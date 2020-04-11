@@ -1,0 +1,6 @@
+# MacOs bs
+.DS_Store
+
+# do not source control the guile manual or guile source
+guile.info
+guile-3.0.2/

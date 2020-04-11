@@ -1,0 +1,17 @@
+#+TITLE: Guile Sceme Install (MacOs Catalina 10.15.3)
+* Installation
+1. Ensure Homebrew is installed.
+2. Download GNU Guile Scheme from [[ftp://ftp.gnu.org/gnu/guile/guile-3.0.2.tar.gz]].
+3. Unpack the archive and ~cd~ into the /guile-3.0.2/ directory.
+4. Run: ~export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"~ to allow the Guile
+   configure script to find /libffi/.
+5. make sure ~gsed~ is installed via ~brew install gnu-sed~
+   + GNU sed has a slightly different implementation of sed compared to the default MacOs version.
+   + Notably, gsed can chain commands via the ~-e~ flag following the ~-i~ flag.
+6. Replace the ~SED~ variable declaration in the make file found at /libguile\/Makefile/ with the ~gsed~
+   path of ~/usr/local/bin/gsed~.
+7. Run: ~./configure~.
+8. Run: ~make~.
+9. Run: ~sudo make install~.
+10. Run: ~sudo make installcheck~ and ensure there are no errors.
+11. Run: ~guile~ and ensure the repl show up.
