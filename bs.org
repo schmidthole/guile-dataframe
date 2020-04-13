@@ -1,0 +1,80 @@
+#+TITLE: Bread Scheme
+
+* Dataframe Format
+Dataframes will be represented as CSV files, with a header row containing all
+fields, followed by ordered data rows. This is how all dataframes will be
+stored on disc or their serialized format between scripts.
+
+#+BEGIN_SRC CSV
+t,o,h,l,c,sma10,sma50,sma200, ....
+1293948292,33.21,34.50,33.10,28.37,44.39,24.77,...
+#+END_SRC
+
+Within schemes, dataframes will be represented by their own record type. This
+record type contains a /headers/ field and a /data/ field.
+
++ The /headers/ field is an alist of all header string names associated with
+  their given index within each point.
++ The /data/ field is a list of vectors containing each point. Order between
+  fields is preserved for all vectors and corresponds to the index specified
+  in the /headers/ field.
+
+#+BEGIN_SRC scheme
+#<<dataframe>
+    headers: (("o" . 0) ("h" . 1) ("l" . 2) ....)
+    data: (#("129.13" "130.5" "128.92" ....))>
+#+END_SRC
+
+** Dataframe Methods
+*** Get Column
+Gets a list representing an entire dataframe column.
+*** Get Row
+Gets a particular row of a dataframe.
+*** Get Field
+Extracts a particular field from a row based on the header name.
+*** Apply Function
+Apply a function or list of functions to the dataframe and add their associated
+columns.
+*** Clean
+Clean out any rows with missing values from the dataframe.
+
+* Basic Calculations
+** Overnight Gap
+Finds the overnight gap between the close and open of 2 points.
+** Percent Change
+Finds the percent change between two numbers.
+** New High
+Determines if the current point represents a new high for all previous points.
+** Absolute Distance
+Determines the absolute distance between two numbers whether they are positive
+or negative.
+** Frequency
+Determines the frequency of occurance in all points of data.
+* Indicators
+** Simple Moving Average (SMA)
+Calculates the simple moving average over a set of points.
+** Exponential Moving Average (EMA)
+Calculates the exponential moving average over a set of points.
+** Moving Average Convergence Divergence (MACD)
+Calculates the MACD over a set of points. Requires previous indicator
+calculation.
+** Average True Range (ATR)
+Calculates the average true range over a set of points.
+** Relative Strength Indicator (RSI)
+Calculates the relative strength indicator over a set of points.
+* Derived Indicators (Proprietary)
+** Volume Spike
+Determines if the current point is a volume spike.
+** Pocket Pivot
+Determines if the current point is a pocket pivot.
+** Gapup
+Determines if the current point is a buyable gapup.
+** Maxima
+Determines if the current point is a relative maxima or minima.
+* Aggregate Indicators
+** Pocket/Gapup Frequency
+Calculates the frequency of both pocket pivots and gapups over the time window.
+** Market Direction
+Determines if the current point is a new maxima or minima.
+** Score
+Calculates the overall score of the current point.

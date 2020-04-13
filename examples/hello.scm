@@ -39,6 +39,8 @@
 (display (test-let-vars 4))
 (newline)
 
+(make-combined-string "hello" "there")
+
 ;; local persistent variables can be defined within environments.
 ;; these vars are essentially "private" to any lambda defined within the env.
 (define get-balance #f)

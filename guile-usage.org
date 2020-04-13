@@ -15,3 +15,9 @@
 9. Run: ~sudo make install~.
 10. Run: ~sudo make installcheck~ and ensure there are no errors.
 11. Run: ~guile~ and ensure the repl show up.
+* Usage
+** Geiser
+*** Keybindings
++ ~C-c C-z~ starts REPL.
++ ~C-x C-e~ executes statement.
++ ~C-c C-b~ evaluates buffer.
