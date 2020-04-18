@@ -31,7 +31,7 @@
     (cond ((not (eof-object? line))
 	   (begin
 	     (loop (read-line)
-		   (append data `(,(list->vector (parse-csv-line line)))))))
+		   (append data `(,(parse-csv-line line))))))
 	  (#t data))))
 
 (define (csv-to-dataframe file-path)
@@ -49,7 +49,7 @@
 	(index (dataframe-hdr-index df col-name)))
     (map-in-order
      (lambda (p)
-       (vector-ref p index))
+       (list-ref p index))
      data)))
 
 (define (dataframe-row df row-index)
@@ -59,10 +59,16 @@
 (define (dataframe-field df col-name row-index)
   (let ((data (df-data df))
 	(index (dataframe-hdr-index df col-name)))
-    (vector-ref (list-ref data row-index) index)))
+    (list-ref (list-ref data row-index) index)))
 
-;; (define (dataframe-apply df new-col-name function)
-;;   ())
+(define (dataframe-apply df new-col-name function)
+  (let* ((headers (df-headers df))
+	 (data (df-data df))
+	 (row-apply (lambda (r) (append r `(,(function r))))))
+      (dataframe
+       (acons new-col-name (length headers) headers)
+       (map-in-order row-apply data))))
 
 (define apple (csv-to-dataframe "AAPL.csv"))
-(dataframe-field apple "t" 78)
+
+(set! apple (dataframe-apply apple "addone" add-one))
