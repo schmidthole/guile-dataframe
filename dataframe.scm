@@ -17,6 +17,14 @@
 (use-modules (srfi srfi-1))
 (use-modules (srfi srfi-9 gnu))
 
+;; global var setting the current lookback/lag/window size for the indicator
+;; being calculated.
+(define indicator-lag 30)
+
+;; global var setting the current dataframe field to calculate the indicator
+;; over.
+(define indicator-field "pp")
+
 ;;
 ;; Record Types
 ;;
@@ -141,20 +149,26 @@ This is necessary for calculating things like moving averages and the like."
 (define (percent-change t1 t2)
   (/ (- t2 t1) t1))
 
-(define (gap headers df)
-  (cond ((< (length df) 2) #f)
-	(#t (let* ((open-index (hdr-index headers "o"))
-		   (close-index (hdr-index headers "c"))
-		   (compare (take-right df 2))
-		   (r1 (list-ref (list-ref compare 0) close-index))
-		   (r2 (list-ref (list-ref compare 1) open-index)))
-	      (- r2 r1)))))
+(define (gap headers data)
+  (if (< (length data) 2) #f
+      (let* ((open-index (hdr-index headers "o"))
+	     (close-index (hdr-index headers "c"))
+	     (compare (take-right data 2))
+	     (r1 (list-ref (list-ref compare 0) close-index))
+	     (r2 (list-ref (list-ref compare 1) open-index)))
+	(- r2 r1))))
 
-(define (new-high headers df)
+(define (new-high headers data)
   (let* ((close-index (hdr-index headers "c"))
-	 (last-close (list-ref (last df) close-index))
+	 (last-close (list-ref (last data) close-index))
 	 (higher-list (filter (lambda (f) (> last-close (list-ref f close-index)))
-			      df)))
+			      data)))
     (equal? (length higher-list) 0)))
+
+(define (frequency-count headers data)
+  (if (< (length data) indicator-lag) 0
+      (let* ((field-index (hdr-index headers indicator-field))
+	     (window (take-right data indicator-lag)))
+	(length (filter (lambda (r) (list-ref r field-index)) window)))))
 
 (define apple (csv->dataframe "AAPL.csv"))
