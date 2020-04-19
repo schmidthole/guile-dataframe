@@ -34,13 +34,23 @@
 ;; Conversion functions
 ;;
 
-(define (parse-csv-line line-str)
+(define (parse-string-field field)
+  (cond ((string=? "False" field) #f)
+	((string=? "" field) #f)
+	((string=? "True" field) #t)
+	((string-index field #\T) field)
+	(#t (string->number field))))
+
+(define (parse-csv-line line-str convert-types)
   (let* ((strip-chars (char-set #\lf #\cr))
-	 (parsed (string-delete strip-chars line-str)))
-    (string-split parsed #\,)))
+	 (parsed (string-delete strip-chars line-str))
+	 (line-list (string-split parsed #\,)))
+    (if convert-types
+	(map-in-order parse-string-field line-list)
+	line-list)))
 
 (define (parse-dataframe-headers)
-  (let* ((hdr-list (parse-csv-line (read-line)))
+  (let* ((hdr-list (parse-csv-line (read-line) #f))
 	 (index 0))
     (map-in-order
      (lambda (h)
@@ -54,7 +64,7 @@
     (cond ((not (eof-object? line))
 	   (begin
 	     (loop (read-line)
-		   (append data `(,(parse-csv-line line))))))
+		   (append data `(,(parse-csv-line line #t))))))
 	  (#t data))))
 
 (define (csv->dataframe file-path)
@@ -136,9 +146,15 @@ This is necessary for calculating things like moving averages and the like."
 	(#t (let* ((open-index (hdr-index headers "o"))
 		   (close-index (hdr-index headers "c"))
 		   (compare (take-right df 2))
-		   (r1 (string->number (list-ref (list-ref compare 0) close-index)))
-		   (r2 (string->number (list-ref (list-ref compare 1) open-index))))
+		   (r1 (list-ref (list-ref compare 0) close-index))
+		   (r2 (list-ref (list-ref compare 1) open-index)))
 	      (- r2 r1)))))
 
+(define (new-high headers df)
+  (let* ((close-index (hdr-index headers "c"))
+	 (last-close (list-ref (last df) close-index))
+	 (higher-list (filter (lambda (f) (> last-close (list-ref f close-index)))
+			      df)))
+    (equal? (length higher-list) 0)))
 
 (define apple (csv->dataframe "AAPL.csv"))
