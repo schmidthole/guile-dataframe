@@ -19,11 +19,11 @@
 
 ;; global var setting the current lookback/lag/window size for the indicator
 ;; being calculated.
-(define indicator-lag 30)
+(define indicator-lag 10)
 
 ;; global var setting the current dataframe field to calculate the indicator
 ;; over.
-(define indicator-field "pp")
+(define indicator-field "c")
 
 ;;
 ;; Record Types
@@ -170,5 +170,22 @@ This is necessary for calculating things like moving averages and the like."
       (let* ((field-index (hdr-index headers indicator-field))
 	     (window (take-right data indicator-lag)))
 	(length (filter (lambda (r) (list-ref r field-index)) window)))))
+
+;;
+;; indicators
+;;
+
+(define (sum lst index)
+  (let ((current-sum 0))
+    (begin (map (lambda (r)
+		  (set! current-sum (+ current-sum (list-ref r index))))
+		lst)
+	   current-sum)))
+
+(define (simple-moving-average headers data)
+  (if (< (length data) indicator-lag) #f
+      (let* ((field-index (hdr-index headers indicator-field))
+	     (window (take-right data indicator-lag)))
+	(/ (sum window field-index) indicator-lag))))
 
 (define apple (csv->dataframe "AAPL.csv"))
