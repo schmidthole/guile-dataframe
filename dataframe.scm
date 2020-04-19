@@ -71,9 +71,8 @@
   (let* ((headers (df-headers df))
 	 (data (df-data df))
 	 (row-apply (lambda (r) (append r `(,(function r))))))
-      (dataframe
-       (acons new-col-name (length headers) headers)
-       (map-in-order row-apply data))))
+    (dataframe (acons new-col-name (length headers) headers)
+	       (map-in-order row-apply data))))
 
 (define (dataframe-rolling-apply df new-col-name function)
   (let ((headers (df-headers df))
@@ -83,8 +82,12 @@
       (cond ((< (length new-data) (length data))
 	     (loop (1+ index)
 		   (append new-data `(,(row-apply (take data index) function)))))
-	    (#t (dataframe
-		 (acons new-col-name (length headers) headers)
-		 new-data))))))
+	    (#t (dataframe (acons new-col-name (length headers) headers)
+			   new-data))))))
+
+(define (dataframe-clean df)
+  (dataframe (df-headers df)
+	     (remove (lambda (r) (or (member #f r) (member "" r)))
+		     (df-data df))))
 
 (define apple (csv-to-dataframe "AAPL.csv"))
