@@ -3,6 +3,8 @@
 
 (use-modules (ice-9 pretty-print))
 (use-modules (ice-9 rdelim))
+
+(use-modules (srfi srfi-1))
 (use-modules (srfi srfi-9 gnu))
 
 (define-immutable-record-type <dataframe>
@@ -61,6 +63,10 @@
 	(index (dataframe-hdr-index df col-name)))
     (list-ref (list-ref data row-index) index)))
 
+(define (row-apply data function)
+  (let* ((row (last data)))
+    (append row `(,(function data)))))
+
 (define (dataframe-apply df new-col-name function)
   (let* ((headers (df-headers df))
 	 (data (df-data df))
@@ -69,6 +75,16 @@
        (acons new-col-name (length headers) headers)
        (map-in-order row-apply data))))
 
-(define apple (csv-to-dataframe "AAPL.csv"))
+(define (dataframe-rolling-apply df new-col-name function)
+  (let ((headers (df-headers df))
+	(data (df-data df)))
+    (let loop ((index 1)
+	       (new-data '()))
+      (cond ((< (length new-data) (length data))
+	     (loop (1+ index)
+		   (append new-data `(,(row-apply (take data index) function)))))
+	    (#t (dataframe
+		 (acons new-col-name (length headers) headers)
+		 new-data))))))
 
-(set! apple (dataframe-apply apple "addone" add-one))
+(define apple (csv-to-dataframe "AAPL.csv"))
