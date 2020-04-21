@@ -11,11 +11,24 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(use-modules (ice-9 pretty-print))
-(use-modules (ice-9 rdelim))
-
-(use-modules (srfi srfi-1))
-(use-modules (srfi srfi-9 gnu))
+(define-module (dataframe)
+  #:use-module (ice-9 rdelim)
+  #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-9 gnu)
+  #:export (dataframe
+	    csv->dataframe
+	    dataframe-hdr-index
+	    dataframe-column
+	    dataframe-row
+	    dataframe-field
+	    dataframe-rolling-apply
+	    dataframe-clean
+	    percent-change
+	    gap
+	    new-high
+	    simple-moving-average
+	    indicator-lag
+	    indicator-field))
 
 ;; global var setting the current lookback/lag/window size for the indicator
 ;; being calculated.
@@ -187,5 +200,3 @@ This is necessary for calculating things like moving averages and the like."
       (let* ((field-index (hdr-index headers indicator-field))
 	     (window (take-right data indicator-lag)))
 	(/ (sum window field-index) indicator-lag))))
-
-(define apple (csv->dataframe "AAPL.csv"))
